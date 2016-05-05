@@ -110,20 +110,26 @@ minetest.register_craft({
 -- Override coalblock to enable lighting a permanent flame above
 
 minetest.override_item("default:coalblock", {
-	on_punch = function(pos, node, puncher)
-		local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-		if puncher:get_wielded_item():get_name() == "default:torch" and
-				minetest.get_node(above).name == "air" then
+	on_punch = function(pos, _, player)
+		pos.y = pos.y+1
+		if minetest.is_protected(pos, player:get_player_name()) then
+			return
+		end
+		local lighter = player:get_wielded_item():get_name()
+		if lighter == "default:torch" or
+				minetest.get_item_group(lighter, "igniter") ~= 0 then
 			minetest.after(0.2, function()
-				minetest.set_node(above, {name = "fire:permanent_flame"})
+				if minetest.get_node(pos).name == "air" then
+					minetest.set_node(pos, {name = "fire:permanent_flame"})
+				end
 			end)
 		end
 	end,
 
-	after_destruct = function(pos, oldnode)
-		local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-		if minetest.get_node(above).name == "fire:permanent_flame" then
-			minetest.set_node(above, {name = "air"})
+	after_destruct = function(pos)
+		pos.y = pos.y+1
+		if minetest.get_node(pos).name == "fire:permanent_flame" then
+			minetest.remove_node(pos)
 		end
 	end,
 })
