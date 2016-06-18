@@ -97,6 +97,17 @@ end
 
 
 --
+-- helper to get tiles for bricks from 16x16 textures
+--
+
+function default.brick_tiles(texture)
+	local top = texture .. "^[combine:16x16:0,8=" .. texture
+	local side2 = "[combine:16x16:0,-8=" .. texture .. ":0,8=" .. texture
+	return {top, top, side2, side2, texture}
+end
+
+
+--
 -- Lavacooling
 --
 
